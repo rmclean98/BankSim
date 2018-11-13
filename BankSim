@@ -1,0 +1,142 @@
+//Ryan McLean
+//Assignment 4
+
+import java.util.*;
+
+public class BankSim {
+
+  public static int currentTime = 0;
+  
+	/**its purpose is to update the simulation for an arrival event.  Its parameters should include the 
+	event, the data structures, and the 
+	Scanner object used to read arrival event information from the input stream
+	 **/
+	
+	public static EventItem processArrival(EventItem data, List<EventItem> event_lists, Queue<EventItem> bankQueue, Scanner input){	
+		currentTime = data.getTime();
+		bankQueue.add(data);
+		if(bankQueue.peek().equals(event_lists.get(0))){
+				insertEvent(currentTime + data.getDuration(), 0, event_lists);
+		}
+
+		if(input.hasNext()) {
+			int arrivalTime = input.nextInt();
+			int duration = input.nextInt();
+			data = insertEvent(arrivalTime, duration, event_lists);
+			System.out.println("Processing an arrival event at time: " + arrivalTime);
+			for(int i = 0; i < event_lists.size();i++){
+				
+				System.out.print(i + " Event List ");
+				event_lists.get(i).eventDisplay();
+			}
+			
+		}
+		return data;
+		
+	}
+	
+	/**its purpose is to update the simulation for a departure event.  Its parameters should include 
+	the event and the data structures
+	 **/
+	
+	public static EventItem processDeparture(EventItem data, List<EventItem> event_lists, Queue<EventItem> bankQueue){
+		currentTime = data.getTime();
+		if (bankQueue != null) {
+			bankQueue.remove(data);
+			if(!event_lists.contains(data)) {
+				insertEvent(currentTime + bankQueue.peek().getDuration(), 0, event_lists);
+			}
+		} 
+		System.out.println("Processing a departure event at time: " + currentTime);
+		for(int i = 0; i < event_lists.size();i++){
+			System.out.print(i + " ");
+			event_lists.get(i).eventDisplay();
+		}
+		return data;
+	}
+	
+	/**its purpose is to add an event to the <event_list>.  Its parameters should include the event 
+	information and the <event_list> data structure.
+	 **/
+	
+	public static EventItem insertEvent(int arrival, int duration, List<EventItem> event_lists){
+		EventItem data;
+		if(duration == 0) {
+			data = new EventItem(arrival);
+		} else {
+			data = new EventItem(arrival, duration);
+		}
+		event_lists.add(data);
+		Collections.sort(event_lists);
+		
+		return data;
+		/**
+		 * 
+		if(event_lists.isEmpty()) {
+			event_lists.add(data);
+		}else {
+			System.out.println(event_lists.size());
+			while(i <= event_lists.size()) {
+				System.out.println("I: " + i);
+				if(event_lists.get(i).compareTo(data) == -1) {
+					System.out.println("here");
+					event_lists.add(i,data);
+				}
+				i++;
+			}
+		}
+		 */
+	}
+	
+	/** its purpose is to generate the final display of statistics.  It should not require any parameters for 
+	reasons noted below.
+	 **/
+	
+	public static void displayStatistics(){
+		
+	}
+	
+	/**its purpose is to declare and initialize the necessary data structures, initialize the state variables to be 
+	used for calculating the statistics,
+	and provide the overall control flow of the program.  Its main loop should consist 
+	of extracting the next event from the <event_list> and invoking the appropriate helper routine depending on the 
+	event type.  Its last action should be to invoke the functio
+	n that generates the output of the statistics.
+	**/
+	
+	public static void main(String[] args){
+		Scanner scanner = new Scanner(System.in);
+		
+		Queue <EventItem> bank_queue = new LinkedList<EventItem>();
+		List <EventItem> event_list = new ArrayList<EventItem>();
+		
+		int arrivalTime = 0, duration = 0;
+		EventItem data;
+		
+			arrivalTime = scanner.nextInt();
+			duration = scanner.nextInt();
+			data = insertEvent(arrivalTime, duration, event_list);
+			bank_queue.add(data);
+			
+			for(int i = 0; i < event_list.size();i++){
+				System.out.print(i + " ");
+				event_list.get(i).eventDisplay();
+			}
+			
+			while(!event_list.isEmpty()) {
+				if(event_list.get(0).isArrival()) {
+					data = processArrival(data, event_list, bank_queue, scanner);
+				} else {
+					 data = processDeparture(data, event_list, bank_queue);
+				}
+				event_list.remove(0);
+			}
+		
+		for(int i = 0; i < event_list.size();i++){
+			System.out.print(i + " ");
+			event_list.get(i).eventDisplay();
+		}
+		System.out.println("Current Time: " + currentTime);
+	}
+	
+}
